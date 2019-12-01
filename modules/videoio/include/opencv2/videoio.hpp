@@ -187,8 +187,20 @@ enum VideoCaptureProperties {
 enum VideoWriterProperties {
   VIDEOWRITER_PROP_QUALITY = 1,    //!< Current quality (0..100%) of the encoded videostream. Can be adjusted dynamically in some codecs.
   VIDEOWRITER_PROP_FRAMEBYTES = 2, //!< (Read-only): Size of just encoded video frame. Note that the encoding order may be different from representation order.
-  VIDEOWRITER_PROP_NSTRIPES = 3    //!< Number of stripes for parallel encoding. -1 for auto detection.
+  VIDEOWRITER_PROP_NSTRIPES = 3,   //!< Number of stripes for parallel encoding. -1 for auto detection.
+  VIDEOWRITER_PROP_BITRATE = 4     //!< Bitrate for the encoded video stream, in bits per second.
 };
+
+/** @brief Key/value structure for %VideoWriterProperties
+*/
+struct VideoWriterPropertyValue {
+    VideoWriterProperties property;
+    double value;
+};
+
+/** @brief List of key/value pairs for %VideoWriterProperties
+*/
+typedef ::std::vector<VideoWriterPropertyValue> VideoWriterPropertyList;
 
 //! @} videoio_flags_base
 
@@ -882,6 +894,13 @@ public:
     CV_WRAP VideoWriter(const String& filename, int apiPreference, int fourcc, double fps,
                 Size frameSize, bool isColor = true);
 
+    /** @overload
+    The `properties` parameter allows to specify properties on initialization.  Some API backends
+    do not allow properties to be set after initialization.
+     */
+    CV_WRAP VideoWriter(const String& filename, int apiPreference, int fourcc, double fps,
+        Size frameSize, bool isColor, const VideoWriterPropertyList& properties);
+
     /** @brief Default destructor
 
     The method first calls VideoWriter::release to close the already opened file.
@@ -903,6 +922,18 @@ public:
      */
     CV_WRAP bool open(const String& filename, int apiPreference, int fourcc, double fps,
                       Size frameSize, bool isColor = true);
+
+    /** @overload
+    The `properties` allows setting properties on initialization.  Some API backends do not allow
+    setting properties after initialization.
+     */
+    CV_WRAP bool open(const String& filename, int fourcc, double fps,
+                      Size frameSize, bool isColor, const VideoWriterPropertyList& properties);
+
+    /** @overload
+     */
+    CV_WRAP bool open(const String& filename, int apiPreference, int fourcc, double fps,
+                      Size frameSize, bool isColor, const VideoWriterPropertyList& properties);
 
     /** @brief Returns true if video writer has been successfully initialized.
     */
